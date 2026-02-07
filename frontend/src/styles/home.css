@@ -1,0 +1,111 @@
+/* Main layout */
+.main-layout {
+  display: grid;
+  grid-template-areas:
+    'topbar topbar'
+    'sidebar content';
+  grid-template-columns: 200px 1fr;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+
+.top-bar {
+  grid-area: topbar;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.top-bar__app-name {
+  font-weight: 600;
+}
+
+.top-bar__search {
+  flex: 1;
+  max-width: 400px;
+  padding: 0.5rem 0.75rem;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  padding: 1rem;
+  border-right: 1px solid #eee;
+}
+
+.sidebar__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar__item {
+  padding: 0.5rem 0;
+}
+
+.main-layout__content {
+  grid-area: content;
+  padding: 1rem;
+}
+
+/* Card grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.category-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.category-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.category-card__name {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.category-card__count {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.category-card__emails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.email-preview {
+  padding: 0.5rem;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+}
+
+.email-preview__sender {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.email-preview__subject {
+  font-size: 0.875rem;
+  color: #333;
+}
+
+.email-preview__date {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.google-button {
+  padding: 0.5rem 1rem;
+}
