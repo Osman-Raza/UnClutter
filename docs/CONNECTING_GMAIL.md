@@ -29,7 +29,7 @@ Follow these steps to use real Gmail data instead of mock data.
 4. Click **Save and Continue**.
 5. **Scopes:** Click **Add or Remove Scopes**. Add:
    - `https://www.googleapis.com/auth/gmail.readonly` (read email)
-   - `https://www.googleapis.com/auth/gmail.modify` (optional; for labels/mark read)
+   - `https://www.googleapis.com/auth/gmail.send` (send replies)
    - `https://www.googleapis.com/auth/userinfo.email`
    - `https://www.googleapis.com/auth/userinfo.profile`
 6. Save and continue through **Test users** (add your Gmail for testing) and **Summary**.

@@ -7,10 +7,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/landing" element={<Navigate to="/" replace />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/landing" element={<Landing />} />
+        <Route path="/home" element={<Home />} />
       </Routes>
     </BrowserRouter>
   )
