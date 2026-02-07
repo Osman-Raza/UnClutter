@@ -1,17 +1,32 @@
-import { categories } from '../../utils/dummyData'
 import CategoryCard from './CategoryCard'
 
-function CardGrid() {
+function CardGrid({
+  categoriesWithEmails = [],
+  selectedEmailId,
+  onSelectEmail,
+  showKeywordChips = true,
+  isSearchResults = false,
+}) {
   return (
-    <div className="card-grid">
-      {categories.map((cat) => (
-        <CategoryCard
-          key={cat.id}
-          categoryName={cat.name}
-          emailCount={cat.emails.length}
-          emails={cat.emails}
-        />
-      ))}
+    <div className="card-grid-wrap">
+      {isSearchResults && (
+        <h2 className="card-grid__results-heading">Search Results</h2>
+      )}
+      <div className="card-grid">
+        {categoriesWithEmails.map(({ category, emails }) => (
+          <CategoryCard
+            key={category.id}
+            categoryName={category.title}
+            description={category.description}
+            emailCount={emails.length}
+            emails={emails}
+            selectedEmailId={selectedEmailId}
+            onSelectEmail={onSelectEmail}
+            showKeywordChips={showKeywordChips}
+            labelColorClass={`category-card--${category.id}`}
+          />
+        ))}
+      </div>
     </div>
   )
 }

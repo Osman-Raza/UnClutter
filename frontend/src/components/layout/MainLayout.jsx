@@ -1,12 +1,19 @@
 import TopBar from './TopBar'
-import Sidebar from './Sidebar'
-import '../styles/home.css'
+import '../../styles/home.css'
 
-function MainLayout({ children }) {
+function MainLayout({
+  children,
+  searchQuery = '',
+  onSearchChange,
+  onRunSort,
+}) {
   return (
     <div className="main-layout">
-      <TopBar />
-      <Sidebar />
+      <TopBar
+        searchQuery={searchQuery}
+        onSearchChange={onSearchChange}
+        onRunSort={onRunSort}
+      />
       <main className="main-layout__content">{children}</main>
     </div>
   )
