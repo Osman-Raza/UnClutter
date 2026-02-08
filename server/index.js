@@ -9,6 +9,7 @@ import { aiRouter } from './routes/ai.js';
 import { groupsRouter } from './routes/groups.js';
 
 const app = express();
+const envFrontend = process.env.FRONTEND_URL?.trim();
 const corsOrigins = [
   'http://localhost:5174',
   'http://localhost:5175',
@@ -16,6 +17,7 @@ const corsOrigins = [
   'http://127.0.0.1:5174',
   'http://127.0.0.1:5175',
   'http://127.0.0.1:5176',
+  ...(envFrontend ? [envFrontend] : []),
 ];
 app.use(cors({ origin: corsOrigins.length ? corsOrigins : true, credentials: true }));
 app.use(express.json());
