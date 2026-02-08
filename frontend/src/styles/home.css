@@ -992,22 +992,32 @@ body.resizing-panels .dashboard--gmail {
    GROUPED EMAIL LIST - Card-based grid (Gmail-style categories)
    ============================================================ */
 
-/* ── grid container ── */
-.gc-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  padding: 16px;
-  width: 100%;
+/* ── grouped view: scrollable wrapper ── */
+.groups-grid-wrapper {
+  height: 100%;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  scroll-behavior: smooth;
+  padding: 20px;
 }
 
-@media (max-width: 1200px) {
-  .gc-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px; }
+/* ── grid container: 2 columns for readability ── */
+.gc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  width: 100%;
+  min-height: min-content;
 }
-@media (max-width: 768px) {
-  .gc-grid { grid-template-columns: 1fr; gap: 12px; padding: 12px; }
+
+@media (max-width: 1400px) {
+  .gc-grid { gap: 16px; }
+  .groups-grid-wrapper { padding: 16px; }
+}
+@media (max-width: 900px) {
+  .gc-grid { grid-template-columns: 1fr; gap: 12px; }
+  .groups-grid-wrapper { padding: 12px; }
 }
 
 /* ── individual card (compact by default) ── */
@@ -1020,15 +1030,22 @@ body.resizing-panels .dashboard--gmail {
   flex-direction: column;
   overflow: hidden;
   transition: box-shadow .2s ease, transform .15s ease, max-height .35s ease;
-  max-height: 310px; /* collapsed: header + desc + ~3 emails */
+  min-height: 280px;
+  max-height: 380px;
   position: relative;
 }
 
 .gc-card--expanded {
-  max-height: 80vh;
+  max-height: 65vh;
+}
+
+.gc-card--expanded .gc-card__emails {
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .gc-card--empty {
+  min-height: 120px;
   max-height: 220px;
 }
 
@@ -1118,6 +1135,10 @@ body.resizing-panels .dashboard--gmail {
   background: #fce8e6;
   color: #d93025;
 }
+
+.gc-card__action--pin { opacity: 0.6; }
+.gc-card__action--pin:hover { opacity: 1; }
+.gc-card__action--pinned { color: #c5221f; opacity: 1; }
 
 /* ── description ── */
 .gc-card__desc {
@@ -1265,6 +1286,26 @@ body.resizing-panels .dashboard--gmail {
   background: #1a73e8;
 }
 
+.gc-email__pin {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.4;
+  line-height: 1;
+  margin-top: 2px;
+  border-radius: 4px;
+  transition: opacity 0.15s, background 0.15s;
+}
+.gc-email__pin:hover { opacity: 0.9; background: #f1f3f4; }
+.gc-email__pin--active { opacity: 1; color: #c5221f; }
+.gc-email--pinned { background: #fffbf0; }
+.gc-email--pinned:hover { background: #fff8e6; }
+
 .gc-email__star {
   color: #fbbc04;
   font-size: 14px;
@@ -1380,10 +1421,25 @@ body.resizing-panels .dashboard--gmail {
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
-  width: 16px;
+  width: 28px;
   margin-right: 8px;
   padding-top: 2px;
 }
+.email-preview__pin {
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.4;
+  line-height: 1;
+  border-radius: 4px;
+  transition: opacity 0.15s, background 0.15s;
+}
+.email-preview__pin:hover { opacity: 0.9; background: #f1f3f4; }
+.email-preview__pin--active { opacity: 1; color: #c5221f; }
+.email-preview--pinned { background: #fffbf0; }
+.email-preview--pinned:hover { background: #fff8e6; }
 
 .email-preview__unread-dot {
   width: 8px;

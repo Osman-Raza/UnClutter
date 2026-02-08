@@ -23,6 +23,8 @@ import {
   deleteEmail,
   archiveEmail,
   starEmail,
+  pinEmail,
+  toggleReadEmail,
   fetchFolder,
   fetchDrafts,
   fetchLabelCounts,
@@ -380,6 +382,8 @@ function Home() {
     const emailObj = typeof emailOrId === 'object' ? emailOrId : null
     const emailId = emailObj?.id || emailOrId
     if (!emailId) return
+    const currentList = activeFolder === 'inbox' ? emails : folderEmails
+    const currentEmail = currentList.find((e) => e.id === emailId)
     setSelectedEmailId(emailId)
     setDetailLoading(true)
     setSelectedEmail(null)
@@ -394,8 +398,16 @@ function Home() {
         labels: mapped.label_ids || [],
       }
       setSelectedEmail(displayEmail)
+      if (currentEmail && currentEmail.is_read === false) {
+        try {
+          await toggleReadEmail(emailId)
+          const markRead = (prev) => prev.map((e) => (e.id === emailId ? { ...e, is_read: true } : e))
+          setEmails(markRead)
+          setFolderEmails(markRead)
+          setSelectedEmail((prev) => (prev ? { ...prev, is_read: true } : prev))
+        } catch (_) {}
+      }
     } catch (err) {
-      // For non-inbox folder emails not in local DB, show the list-level data we have
       if (emailObj) {
         setSelectedEmail({
           ...emailObj,
@@ -411,7 +423,7 @@ function Home() {
     } finally {
       setDetailLoading(false)
     }
-  }, [])
+  }, [activeFolder, emails, folderEmails, toggleReadEmail])
 
   const handleSync = useCallback(async () => {
     setSyncing(true)
@@ -527,6 +539,52 @@ function Home() {
     }
   }, [selectedEmail, addToast])
 
+  const handleToggleRead = useCallback(async (emailId) => {
+    try {
+      const result = await toggleReadEmail(emailId)
+      const updater = (prev) => prev.map((e) => (e.id === emailId ? { ...e, is_read: result.is_read } : e))
+      setEmails(updater)
+      setFolderEmails(updater)
+      if (selectedEmail?.id === emailId) {
+        setSelectedEmail((prev) => (prev ? { ...prev, is_read: result.is_read } : prev))
+      }
+      addToast({ type: 'success', message: result.is_read ? 'Marked as read' : 'Marked as unread' })
+    } catch (err) {
+      addToast({ type: 'error', message: err.message || 'Failed to update read status' })
+    }
+  }, [selectedEmail?.id, addToast])
+
+  const handlePinGroup = useCallback(async (group) => {
+    if (!group || group.id === '__all__' || group.id === '__unsorted__') return
+    try {
+      await updateGroup(group.id, { is_pinned: !group.is_pinned })
+      const groups = await fetchGroups()
+      setUserGroups(groups)
+      addToast({ type: 'success', message: group.is_pinned ? 'Group unpinned' : 'Group pinned' })
+    } catch (err) {
+      addToast({ type: 'error', message: err.message || 'Failed to update group' })
+    }
+  }, [addToast])
+
+  const handlePinEmail = useCallback(async (emailOrId) => {
+    const emailId = typeof emailOrId === 'object' ? emailOrId?.id : emailOrId
+    if (!emailId) return
+    try {
+      const result = await pinEmail(emailId)
+      const updater = (prev) => prev.map((e) =>
+        e.id === emailId ? { ...e, is_pinned: result.is_pinned, pinned_at: result.is_pinned ? new Date().toISOString() : null } : e
+      )
+      setEmails(updater)
+      setFolderEmails(updater)
+      if (selectedEmail?.id === emailId) {
+        setSelectedEmail((prev) => (prev ? { ...prev, is_pinned: result.is_pinned } : prev))
+      }
+      addToast({ type: 'success', message: result.is_pinned ? 'Email pinned' : 'Email unpinned' })
+    } catch (err) {
+      addToast({ type: 'error', message: err.message || 'Failed to update pin' })
+    }
+  }, [selectedEmail?.id, addToast])
+
   const handleComposeFromChat = useCallback(({ to, subject, body }) => {
     setComposeInitial({ to, subject, body })
     setComposeOpen(true)
@@ -593,15 +651,20 @@ function Home() {
   }, [sortedEmails, userGroups])
 
   const displayedEmails = useMemo(() => {
+    let list
     if (viewMode === 'grouped') return sortedEmails
-    // Tab view: filter by selected group tab
-    if (activeTab === '__all__') return sortedEmails
-    if (activeTab === '__unsorted__') {
-      return sortedEmails.filter((e) => !userGroups.some((g) => matchEmailToGroup(e, g)))
+    if (activeTab === '__all__') list = sortedEmails
+    else if (activeTab === '__unsorted__') list = sortedEmails.filter((e) => !userGroups.some((g) => matchEmailToGroup(e, g)))
+    else {
+      const group = userGroups.find((g) => g.id === activeTab)
+      list = group ? sortedEmails.filter((e) => matchEmailToGroup(e, group)) : sortedEmails
     }
-    const group = userGroups.find((g) => g.id === activeTab)
-    if (group) return sortedEmails.filter((e) => matchEmailToGroup(e, group))
-    return sortedEmails
+    return [...list].sort((a, b) => {
+      if (a.is_pinned && !b.is_pinned) return -1
+      if (!a.is_pinned && b.is_pinned) return 1
+      if (a.is_pinned && b.is_pinned) return new Date(b.pinned_at || 0) - new Date(a.pinned_at || 0)
+      return (new Date(b.received_at || 0) - new Date(a.received_at || 0))
+    })
   }, [sortedEmails, viewMode, activeTab, userGroups])
 
   const categoryTabsWithCounts = useMemo(
@@ -796,6 +859,7 @@ function Home() {
                   emails={folderEmails}
                   selectedEmailId={selectedEmailId}
                   onSelectEmail={handleEmailClick}
+                  onPinEmail={handlePinEmail}
                   showKeywordChips={false}
                 />
               )
@@ -822,14 +886,17 @@ function Home() {
                 userGroups={userGroups}
                 selectedEmailId={selectedEmailId}
                 onSelectEmail={handleEmailClick}
+                onPinEmail={handlePinEmail}
                 onEditGroup={handleEditGroup}
                 onDeleteGroup={handleDeleteGroup}
+                onPinGroup={handlePinGroup}
               />
             ) : (
               <EmailList
                 emails={displayedEmails}
                 selectedEmailId={selectedEmailId}
                 onSelectEmail={handleEmailClick}
+                onPinEmail={handlePinEmail}
                 showKeywordChips={false}
               />
             )}
@@ -859,6 +926,7 @@ function Home() {
               onArchive={handleArchiveEmail}
               onStar={handleStarEmail}
               onReply={handleReplyEmail}
+              onToggleRead={handleToggleRead}
             />
           ) : !isGroupedView ? (
             <div className="email-detail-empty">

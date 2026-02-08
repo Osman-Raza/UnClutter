@@ -4,6 +4,7 @@ function EmailList({
   emails = [],
   selectedEmailId,
   onSelectEmail,
+  onPinEmail,
   showKeywordChips = false,
 }) {
   return (
@@ -14,6 +15,7 @@ function EmailList({
           email={email}
           isSelected={selectedEmailId === email.id}
           onClick={onSelectEmail}
+          onPinEmail={onPinEmail}
           showKeywordChips={showKeywordChips}
         />
       ))}

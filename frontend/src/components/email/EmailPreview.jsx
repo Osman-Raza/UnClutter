@@ -6,16 +6,17 @@ function getSenderName(from) {
   return match ? match[1].replace(/"/g, '').trim() : from.split('@')[0]
 }
 
-function EmailPreview({ email, isSelected, onClick, showKeywordChips = true }) {
+function EmailPreview({ email, isSelected, onClick, onPinEmail, showKeywordChips = true }) {
   if (!email) return null
 
   const isUnread = email.is_read === false || (email.label_ids && email.label_ids.includes('UNREAD'))
   const isStarred = email.is_starred || (email.label_ids && email.label_ids.includes('STARRED'))
+  const isPinned = email.is_pinned
   const senderName = getSenderName(email.from_address || email.sender)
 
   return (
     <div
-      className={`email-preview ${isSelected ? 'email-preview--selected' : ''} ${isUnread ? 'email-preview--unread' : ''}`}
+      className={`email-preview ${isSelected ? 'email-preview--selected' : ''} ${isUnread ? 'email-preview--unread' : ''} ${isPinned ? 'email-preview--pinned' : ''}`}
       onClick={() => onClick?.(email)}
       onKeyDown={(e) => e.key === 'Enter' && onClick?.(email)}
       role="button"
@@ -23,6 +24,15 @@ function EmailPreview({ email, isSelected, onClick, showKeywordChips = true }) {
       aria-pressed={isSelected}
     >
       <div className="email-preview__indicators">
+        <button
+          type="button"
+          className={`email-preview__pin ${isPinned ? 'email-preview__pin--active' : ''}`}
+          onClick={(e) => { e.stopPropagation(); onPinEmail?.(email) }}
+          title={isPinned ? 'Unpin' : 'Pin'}
+          aria-label={isPinned ? 'Unpin' : 'Pin'}
+        >
+          &#128204;
+        </button>
         {isUnread && <span className="email-preview__unread-dot" />}
         {isStarred && <span className="email-preview__star-icon">&#9733;</span>}
       </div>

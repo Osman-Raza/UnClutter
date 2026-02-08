@@ -109,6 +109,10 @@ export async function starEmail(emailId) {
   return fetchWithAuth(`/gmail/email/${emailId}/star`, { method: 'POST' })
 }
 
+export async function pinEmail(emailId) {
+  return fetchWithAuth(`/gmail/email/${emailId}/pin`, { method: 'POST' })
+}
+
 export async function toggleReadEmail(emailId) {
   return fetchWithAuth(`/gmail/email/${emailId}/read`, { method: 'POST' })
 }
@@ -132,6 +136,8 @@ export function mapEmailFromBackend(email) {
     received_at: email.received_at,
     is_read: email.is_read,
     is_starred: email.is_starred,
+    is_pinned: email.is_pinned,
+    pinned_at: email.pinned_at,
     ai_category: email.ai_category,
     ai_summary: email.ai_summary,
     label_ids: email.label_ids || [],

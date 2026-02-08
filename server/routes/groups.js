@@ -44,19 +44,15 @@ groupsRouter.post('/', async (req, res) => {
     return res.status(400).json({ error: 'name required' });
   }
   const trimmedName = name.trim();
-
-  // Check for duplicate group name
   const { data: existing } = await supabase
     .from('user_groups')
     .select('id')
     .eq('account_id', req.accountId)
     .ilike('name', trimmedName)
     .limit(1);
-
-  if (existing && existing.length > 0) {
-    return res.status(409).json({ error: `A group named "${trimmedName}" already exists. Try a different name or edit the existing group.` });
+  if (existing?.length) {
+    return res.status(409).json({ error: `A group named "${trimmedName}" already exists.` });
   }
-
   const { data: groups } = await supabase.from('user_groups').select('sort_order').eq('account_id', req.accountId);
   const maxOrder = (groups || []).reduce((m, g) => Math.max(m, g.sort_order || 0), 0);
   const { data, error } = await supabase
@@ -76,9 +72,6 @@ groupsRouter.post('/', async (req, res) => {
     .single();
   if (error) {
     console.error(error);
-    if (error.code === '23505') {
-      return res.status(409).json({ error: `A group named "${trimmedName}" already exists` });
-    }
     return res.status(500).json({ error: 'Failed to create group' });
   }
   res.json({ group: data });
@@ -87,11 +80,16 @@ groupsRouter.post('/', async (req, res) => {
 groupsRouter.patch('/:id', async (req, res) => {
   const { id } = req.params;
   const updates = {};
-  const allowed = ['name', 'description', 'color', 'match_keywords', 'match_domains', 'match_senders', 'sort_order'];
+  const allowed = ['name', 'description', 'color', 'match_keywords', 'match_domains', 'match_senders', 'sort_order', 'is_pinned'];
   for (const k of allowed) {
     if (req.body?.[k] !== undefined) {
       updates[k] = req.body[k];
     }
+  }
+  if (req.body?.is_pinned === true) {
+    updates.pinned_at = new Date().toISOString();
+  } else if (req.body?.is_pinned === false) {
+    updates.pinned_at = null;
   }
   if (Object.keys(updates).length === 0) {
     return res.status(400).json({ error: 'No valid fields to update' });
