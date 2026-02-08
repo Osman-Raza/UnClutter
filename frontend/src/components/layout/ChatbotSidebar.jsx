@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { getAuthHeaders } from '../../utils/auth'
+import { API_BASE, getAuthHeaders } from '../../utils/auth'
 import { createGroupFromIntent } from '../../utils/groupsApi'
 
 const INITIAL_MESSAGES = [
@@ -219,7 +219,7 @@ function ChatbotSidebar({ isOpen = true, onClose, selectedEmail, emails = [], on
           selectedEmail: selectedEmail || undefined,
           emails: (emails || []).slice(0, 25),
         }
-        const res = await fetch('/api/ai/chat', {
+        const res = await fetch(`${API_BASE || ''}/api/ai/chat`, {
           method: 'POST',
           headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
