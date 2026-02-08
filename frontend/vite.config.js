@@ -1,14 +1,16 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// For GitHub Pages: set VITE_BASE_PATH to your repo name, e.g. /UnClutter/
-const base = process.env.VITE_BASE_PATH || '/'
-
 export default defineConfig({
-  base,
   plugins: [react()],
   server: {
     port: 5174,
-    open: 'chrome', // <-- forces Chrome
+    host: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
   },
 })

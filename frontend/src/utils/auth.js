@@ -1,26 +1,35 @@
 /**
- * Auth token for backend (Gmail OAuth). Stored in sessionStorage.
+ * Session-based auth: X-Session-Id header for backend API.
+ * Session ID stored in localStorage.
  */
-const KEY = 'unclutter_auth_token'
+const SESSION_KEY = 'unclutter_session_id'
 
-export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001'
+export const API_BASE = import.meta.env.VITE_API_URL ?? ''
 
-export function getToken() {
-  return sessionStorage.getItem(KEY)
+export function getSessionId() {
+  return localStorage.getItem(SESSION_KEY)
 }
 
-export function setToken(token) {
-  if (token) sessionStorage.setItem(KEY, token)
-  else sessionStorage.removeItem(KEY)
+export function setSessionId(sessionId) {
+  if (sessionId) {
+    localStorage.setItem(SESSION_KEY, sessionId)
+  } else {
+    localStorage.removeItem(SESSION_KEY)
+  }
 }
 
-export function clearToken() {
-  sessionStorage.removeItem(KEY)
+export function clearSession() {
+  localStorage.removeItem(SESSION_KEY)
 }
 
 export function getAuthHeaders() {
-  const token = getToken()
+  const sessionId = getSessionId()
   const headers = { 'Content-Type': 'application/json' }
-  if (token) headers.Authorization = `Bearer ${token}`
+  if (sessionId) headers['X-Session-Id'] = sessionId
   return headers
 }
+
+/** Legacy aliases for compatibility */
+export const getToken = getSessionId
+export const setToken = setSessionId
+export const clearToken = clearSession
