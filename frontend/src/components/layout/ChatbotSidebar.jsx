@@ -57,6 +57,8 @@ function isGroupDeleteIntent(text) {
   if (/^(delete|remove|archive)\s+(a\s+)?(email\s+)?group/i.test(lower)) return true
   if (/^delete\s+group\s+/i.test(lower)) return true
   if (/^remove\s+group\s+/i.test(lower)) return true
+  if (/^delete\s+group\s+for\s+/i.test(lower)) return true
+  if (/^remove\s+group\s+for\s+/i.test(lower)) return true
   return false
 }
 
@@ -65,10 +67,12 @@ function extractGroupNameForDelete(text) {
   const patterns = [
     /^(?:delete|remove|archive)\s+(?:a\s+)?(?:email\s+)?group\s+/i,
     /^(?:delete|remove)\s+group\s+/i,
+    /^(?:delete|remove)\s+group\s+for\s+/i,
   ]
   for (const p of patterns) {
     result = result.replace(p, '')
   }
+  result = result.replace(/^(for|about)\s+/i, '')
   return result.trim().replace(/^"|"$/g, '') || ''
 }
 
